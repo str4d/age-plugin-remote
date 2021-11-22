@@ -3,6 +3,7 @@ name = "age-plugin-remote"
 description = "TBD"
 version = "0.0.0"
 authors = ["Jack Grigg <thestr4d@gmail.com>"]
+readme = "README.md"
 license = "MIT OR Apache-2.0"
 edition = "2021"
 
