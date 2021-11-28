@@ -1,14 +1,15 @@
 //! The `age-plugin-remote` proxy.
 //!
-//! The proxy runs on the remote machine. It is invoked by the [agent] and persists until
-//! the SSH connection from the agent is closed. The proxy maintains a Unix socket that
-//! [plugin] instances can connect to; the proxy forwards each connection to the agent,
-//! and passes data between them.
+//! The proxy runs on the local machine. It opens a connection to the remote machine to
+//! create a Unix socket, and produces an identity file that can be used by age clients on
+//! the remote machine. It then accepts connections via the Unix socket from [plugin]
+//! instances started by those age clients. For each plugin instance, the proxy itself
+//! acts like an age client and age plugin combined: it receives decryption commands
+//! forwarded from the plugin instance, and then acts on them using pre-configured local
+//! identities (which may include plugin identities).
 //!
-//! The IPC protocol between the proxy and plugin instances is an internal implementation
-//! detail, not covered by any stability guarantees. The `age-plugin-remote` binary that
-//! the agent will invoke should be the exact same binary that is available to age clients
-//! on their PATH.
+//! TODO: Should proxy and plugin communicate via age stanzas? May as well, I guess, but
+//! then it would be nice to have a plugin variant that allows for direct forwarding? Or
+//! is that unnecessary / doesn't work for this protocol?
 //!
-//! [agent]: crate::agent
 //! [plugin]: crate::plugin

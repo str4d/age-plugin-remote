@@ -1,4 +1,3 @@
-mod agent;
 mod plugin;
 mod proxy;
 
