@@ -9,6 +9,7 @@ edition = "2021"
 
 [dependencies]
 # Crypto dependencies
+age = { version = "0.7", features = ["armor", "cli-common", "plugin"] }
 rand = "0.8"
 
 # General binary dependencies

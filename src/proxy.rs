@@ -51,7 +51,10 @@ pub(crate) fn remote_path(tag: u32) -> PathBuf {
     path
 }
 
-pub(crate) async fn run_local(destinations: Vec<String>) -> io::Result<()> {
+pub(crate) async fn run_local(
+    identities: Vec<Box<dyn age::Identity>>,
+    destinations: Vec<String>,
+) -> io::Result<()> {
     // TODO: Allow user to specify an existing proxy identity file.
     let tag = 12345; //OsRng.next_u32();
     println!("Starting age-plugin-remote proxy with tag {}", tag);
