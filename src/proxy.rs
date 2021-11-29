@@ -28,6 +28,8 @@ use tokio::{
     process::Command,
 };
 
+use crate::identity::Identity;
+
 pub(crate) fn local_path() -> PathBuf {
     let mut path = env::temp_dir();
     path.push(format!(
@@ -41,26 +43,18 @@ pub(crate) fn local_path() -> PathBuf {
     path
 }
 
-/// Returns the predictable path that a proxy for the given tag will listen on.
-///
-/// TODO: Make this actually predictable? Run a quick command on the remote to figure out
-/// the tmpdir, and then use that here?
-pub(crate) fn remote_path(tag: u32) -> PathBuf {
-    let mut path = env::temp_dir();
-    path.push(format!(".age-plugin-remote.{:08x}.sock", tag));
-    path
-}
-
 pub(crate) async fn run_local(
     identities: Vec<Box<dyn age::Identity>>,
     destinations: Vec<String>,
 ) -> io::Result<()> {
-    // TODO: Allow user to specify an existing proxy identity file.
-    let tag = 12345; //OsRng.next_u32();
-    println!("Starting age-plugin-remote proxy with tag {}", tag);
+    let identity = Identity::new();
+    println!(
+        "Starting age-plugin-remote proxy with identity {}",
+        identity
+    );
 
     let local_path = local_path();
-    let remote_path = remote_path(tag);
+    let remote_path = identity.remote_path();
 
     // Open the local listener.
     let listener = UnixListener::bind(&local_path)?;
@@ -100,11 +94,8 @@ pub(crate) async fn run_local(
     }
 }
 
-pub(crate) async fn run_remote() -> io::Result<()> {
-    // TODO: Obtain this from the plugin identity.
-    let tag = 12345;
-
-    let remote_path = remote_path(tag);
+pub(crate) async fn run_remote(proxy_identity: &Identity) -> io::Result<()> {
+    let remote_path = proxy_identity.remote_path();
     let mut conn = UnixStream::connect(remote_path).await?;
 
     // TODO: Implement the real protocol.

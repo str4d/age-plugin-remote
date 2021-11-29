@@ -1,12 +1,16 @@
 use std::fmt;
 use std::io;
 
+use age_plugin::run_state_machine;
 use gumdrop::Options;
 
+mod identity;
 mod plugin;
 mod proxy;
 
+const PLUGIN_NAME: &str = "remote";
 const BINARY_NAME: &str = "age-plugin-remote";
+const IDENTITY_PREFIX: &str = "age-plugin-remote-";
 
 enum Error {
     IdentityRead(age::cli_common::ReadError),
@@ -71,9 +75,11 @@ fn main() -> Result<(), Error> {
     let opts = PluginOptions::parse_args_default_or_exit();
 
     if let Some(state_machine) = opts.age_plugin {
-        // TODO: Run plugin state machine
-        let rt = tokio::runtime::Runtime::new()?;
-        rt.block_on(proxy::run_remote())?;
+        run_state_machine(
+            &state_machine,
+            plugin::RecipientPlugin::default,
+            plugin::IdentityPlugin::default,
+        )?;
     } else if opts.version {
         println!("{} {}", BINARY_NAME, env!("CARGO_PKG_VERSION"));
     } else if opts.identity.is_empty() {
