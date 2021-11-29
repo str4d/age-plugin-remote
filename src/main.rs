@@ -42,7 +42,9 @@ fn main() -> io::Result<()> {
     let opts = PluginOptions::parse_args_default_or_exit();
 
     if let Some(state_machine) = opts.age_plugin {
-        todo!("Run plugin state machine");
+        // TODO: Run plugin state machine
+        let rt = tokio::runtime::Runtime::new()?;
+        rt.block_on(proxy::run_remote())?;
     } else if opts.version {
         println!("{} {}", BINARY_NAME, env!("CARGO_PKG_VERSION"));
     } else if opts.identity.is_empty() {
@@ -50,7 +52,8 @@ fn main() -> io::Result<()> {
     } else if opts.destination.is_empty() {
         eprintln!("At least one SSH destination must be specified to proxy identities to.");
     } else {
-        todo!("Run proxy");
+        let rt = tokio::runtime::Runtime::new()?;
+        rt.block_on(proxy::run_local(opts.destination))?;
     }
 
     Ok(())
