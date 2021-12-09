@@ -8,11 +8,9 @@ Proxy identities act as bearer tokens. A proxy identity is only "active" if the 
 provides it when starting the agent. The proxy identity may access all real identities
 that the authority provides when starting the agent.
 
-`TAG` exists because `PORT` is too small to be collision-resistant across multiple
-restarts. A 32-bit `TAG` can be persisted in the proxy identity file, and then reused with
+A 32-bit `TAG` can be persisted in the proxy identity file, and then reused with
 a small-enough chance of collision (since we only care about collisions on a per-user
-level, and similar age tags in other identities are also 32 bits). The proxy run by the
-agent provides the live mapping from `TAG` to `PORT`.
+level, and similar age tags in other identities are also 32 bits).
 
 To reuse proxy identities, you might need a one-time remote server setup:
 
