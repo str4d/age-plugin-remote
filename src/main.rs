@@ -1,6 +1,7 @@
 use std::fmt;
 use std::io;
 
+use age::cli_common::StdinGuard;
 use age_plugin::run_state_machine;
 use gumdrop::Options;
 
@@ -75,11 +76,7 @@ fn main() -> Result<(), Error> {
     let opts = PluginOptions::parse_args_default_or_exit();
 
     if let Some(state_machine) = opts.age_plugin {
-        run_state_machine(
-            &state_machine,
-            plugin::RecipientPlugin::default,
-            plugin::IdentityPlugin::default,
-        )?;
+        run_state_machine(&state_machine, plugin::Handler)?;
     } else if opts.version {
         println!("{} {}", BINARY_NAME, env!("CARGO_PKG_VERSION"));
     } else if opts.identity.is_empty() {
@@ -87,7 +84,9 @@ fn main() -> Result<(), Error> {
     } else if opts.destination.is_empty() {
         eprintln!("At least one SSH destination must be specified to proxy identities to.");
     } else {
-        let identities = age::cli_common::read_identities(opts.identity, None)?;
+        let mut stdin_guard = StdinGuard::new(false);
+
+        let identities = age::cli_common::read_identities(opts.identity, None, &mut stdin_guard)?;
 
         let rt = tokio::runtime::Runtime::new()?;
         rt.block_on(proxy::run_local(identities, opts.destination))?;

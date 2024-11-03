@@ -9,45 +9,24 @@
 //!
 //! [proxies]: crate::proxy
 
-use std::collections::HashMap;
+use std::{collections::HashMap, convert::Infallible};
 
 use age_core::format::{FileKey, Stanza};
 use age_plugin::{
     identity::{Error, IdentityPluginV1},
-    recipient::RecipientPluginV1,
+    PluginHandler,
 };
 
 use crate::{identity::Identity, proxy, PLUGIN_NAME};
 
-/// Exists because `age_plugin::run_state_machine` currently requires it.
-#[derive(Default)]
-pub(crate) struct RecipientPlugin;
+pub(crate) struct Handler;
 
-impl RecipientPluginV1 for RecipientPlugin {
-    fn add_recipient(
-        &mut self,
-        _: usize,
-        _: &str,
-        _: &[u8],
-    ) -> Result<(), age_plugin::recipient::Error> {
-        unimplemented!()
-    }
+impl PluginHandler for Handler {
+    type RecipientV1 = Infallible;
+    type IdentityV1 = IdentityPlugin;
 
-    fn add_identity(
-        &mut self,
-        _: usize,
-        _: &str,
-        _: &[u8],
-    ) -> Result<(), age_plugin::recipient::Error> {
-        unimplemented!()
-    }
-
-    fn wrap_file_keys(
-        &mut self,
-        _: Vec<FileKey>,
-        _: impl age_plugin::Callbacks<age_plugin::recipient::Error>,
-    ) -> std::io::Result<Result<Vec<Vec<Stanza>>, Vec<age_plugin::recipient::Error>>> {
-        unimplemented!()
+    fn identity_v1(self) -> std::io::Result<Self::IdentityV1> {
+        Ok(IdentityPlugin::default())
     }
 }
 
