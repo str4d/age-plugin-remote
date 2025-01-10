@@ -3,7 +3,7 @@ use std::io;
 
 use age::cli_common::StdinGuard;
 use age_plugin::run_state_machine;
-use gumdrop::Options;
+use clap::Parser;
 
 mod identity;
 mod plugin;
@@ -41,28 +41,18 @@ impl fmt::Debug for Error {
     }
 }
 
-#[derive(Debug, Options)]
+#[derive(Debug, Parser)]
+#[command(version)]
 struct PluginOptions {
-    #[options(help = "Print this help message and exit.")]
-    help: bool,
-
-    #[options(help = "Print version info and exit.", short = "V")]
-    version: bool,
-
-    #[options(
-        help = "Run the given age plugin state machine. Internal use only.",
-        meta = "STATE-MACHINE",
-        no_short
-    )]
+    /// Run the given age plugin state machine. Internal use only.
+    #[arg(long, hide = true)]
     age_plugin: Option<String>,
 
-    #[options(help = "Expose the identity file at IDENTITY. May be repeated.")]
+    /// Expose the identity file at IDENTITY. May be repeated.
+    #[arg(short, long)]
     identity: Vec<String>,
 
-    #[options(
-        help = "SSH destination to proxy identity files to. May be repeated.",
-        free
-    )]
+    /// SSH destination to proxy identity files to. May be repeated.
     destination: Vec<String>,
 }
 
@@ -73,12 +63,10 @@ fn main() -> Result<(), Error> {
         .parse_default_env()
         .init();
 
-    let opts = PluginOptions::parse_args_default_or_exit();
+    let opts = PluginOptions::parse();
 
     if let Some(state_machine) = opts.age_plugin {
         run_state_machine(&state_machine, plugin::Handler)?;
-    } else if opts.version {
-        println!("{} {}", BINARY_NAME, env!("CARGO_PKG_VERSION"));
     } else if opts.identity.is_empty() {
         eprintln!("At least one age identity must be specified to expose.");
     } else if opts.destination.is_empty() {
